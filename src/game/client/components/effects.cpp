@@ -144,6 +144,23 @@ void CEffects::SkidTrail(vec2 Pos, vec2 Vel)
 	p.m_Gravity = random_float()*-500.0f;
 	p.m_Color = vec4(0.75f,0.75f,0.75f,1.0f);
 	m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
+
+	// immersion: small dust grains kicked up by the skid
+	if(random_int()%3 == 0)
+	{
+		CParticle d;
+		d.SetDefault();
+		d.m_Spr = SPRITE_PART_BALL;
+		d.m_Pos = Pos;
+		d.m_Vel = Vel + RandomDir()*120.0f + vec2(0, -60.0f);
+		d.m_LifeSpan = 0.2f + random_float()*0.2f;
+		d.m_StartSize = 4.0f + random_float()*3.0f;
+		d.m_EndSize = 0;
+		d.m_Gravity = 600.0f;
+		d.m_Friction = 0.8f;
+		d.m_Color = vec4(0.65f, 0.6f, 0.5f, 0.8f);
+		m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &d);
+	}
 }
 
 void CEffects::BulletTrail(vec2 Pos)
@@ -230,6 +247,26 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 		p.m_Color = vec4(c.r, c.g, c.b, 0.75f);
 		m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
 	}
+
+	// immersion: fine blood mist and heavier drops that fall longer
+	for(int i = 0; i < 24; i++)
+	{
+		CParticle p;
+		p.SetDefault();
+		p.m_Spr = SPRITE_PART_SPLAT01 + (random_int()%3);
+		p.m_Pos = Pos;
+		p.m_Vel = RandomDir() * ((random_float()+0.2f)*500.0f) + vec2(0, -150.0f);
+		p.m_LifeSpan = 0.6f + random_float()*0.5f;
+		p.m_StartSize = 10.0f + random_float()*10.0f;
+		p.m_EndSize = 0;
+		p.m_Rot = random_float()*pi*2;
+		p.m_Rotspeed = (random_float()-0.5f) * pi;
+		p.m_Gravity = 1100.0f;
+		p.m_Friction = 0.9f;
+		vec3 c = BloodColor * (0.5f + random_float()*0.3f);
+		p.m_Color = vec4(c.r, c.g, c.b, 0.85f);
+		m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
+	}
 }
 
 
@@ -257,6 +294,17 @@ void CEffects::Explosion(vec2 Pos)
 	p.m_Rot = random_float()*pi*2;
 	m_pClient->m_pParticles->Add(CParticles::GROUP_EXPLOSIONS, &p);
 
+	// immersion: short bright flash at the core of the explosion
+	CParticle f;
+	f.SetDefault();
+	f.m_Spr = SPRITE_PART_BALL;
+	f.m_Pos = Pos;
+	f.m_LifeSpan = 0.12f;
+	f.m_StartSize = 200.0f;
+	f.m_EndSize = 0;
+	f.m_Color = vec4(1.0f, 0.85f, 0.5f, 0.6f);
+	m_pClient->m_pParticles->Add(CParticles::GROUP_EXPLOSIONS, &f);
+
 	// add the smoke
 	for(int i = 0; i < 24; i++)
 	{
@@ -273,6 +321,23 @@ void CEffects::Explosion(vec2 Pos)
 		p.m_Color = mix(vec4(0.75f,0.75f,0.75f,1.0f), vec4(0.5f,0.5f,0.5f,1.0f), random_float());
 		m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
 	}
+
+	// immersion: glowing debris/sparks thrown out and pulled down by gravity
+	for(int i = 0; i < 16; i++)
+	{
+		CParticle d;
+		d.SetDefault();
+		d.m_Spr = SPRITE_PART_BALL;
+		d.m_Pos = Pos;
+		d.m_Vel = RandomDir() * ((0.4f + random_float()*0.8f) * 900.0f);
+		d.m_LifeSpan = 0.4f + random_float()*0.4f;
+		d.m_StartSize = 6.0f + random_float()*5.0f;
+		d.m_EndSize = 0;
+		d.m_Gravity = 900.0f;
+		d.m_Friction = 0.85f;
+		d.m_Color = mix(vec4(1.0f, 0.8f, 0.3f, 1.0f), vec4(1.0f, 0.4f, 0.1f, 1.0f), random_float());
+		m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &d);
+	}
 }
 
 
@@ -288,6 +353,24 @@ void CEffects::HammerHit(vec2 Pos)
 	p.m_EndSize = 0;
 	p.m_Rot = random_float()*pi*2;
 	m_pClient->m_pParticles->Add(CParticles::GROUP_EXPLOSIONS, &p);
+
+	// immersion: sparks flying off the impact point
+	for(int i = 0; i < 8; i++)
+	{
+		CParticle s;
+		s.SetDefault();
+		s.m_Spr = SPRITE_PART_BALL;
+		s.m_Pos = Pos;
+		s.m_Vel = RandomDir() * ((0.3f + random_float()*0.7f) * 600.0f);
+		s.m_LifeSpan = 0.2f + random_float()*0.2f;
+		s.m_StartSize = 5.0f + random_float()*3.0f;
+		s.m_EndSize = 0;
+		s.m_Gravity = 700.0f;
+		s.m_Friction = 0.85f;
+		s.m_Color = vec4(1.0f, 0.9f, 0.5f, 1.0f);
+		m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &s);
+	}
+
 	m_pClient->m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_HAMMER_HIT, 1.0f, Pos);
 }
 
