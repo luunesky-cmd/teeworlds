@@ -58,11 +58,15 @@ void CDamageInd::OnRender()
 		else
 		{
 			vec2 Pos = mix(m_aItems[i].m_Pos+m_aItems[i].m_Dir*75.0f, m_aItems[i].m_Pos, clamp((m_aItems[i].m_LifeTime-0.60f)/0.15f, 0.0f, 1.0f));
-			const float Alpha = clamp(m_aItems[i].m_LifeTime * 10.0f, 0.0f, 1.0f); // 0.1 -> 0.0 == 1.0 -> 0.0
+			// softer fade: starts fading at 0.25s left instead of 0.1s
+			const float Alpha = clamp(m_aItems[i].m_LifeTime * 4.0f, 0.0f, 1.0f);
+			// pulse: star pops up at spawn, then shrinks as it fades
+			const float Progress = 1.0f - clamp(m_aItems[i].m_LifeTime / 0.75f, 0.0f, 1.0f); // 0 -> 1
+			const float Scale = 1.0f + 0.35f * sinf(Progress * pi) - 0.25f * Progress;
 			Graphics()->SetColor(1.0f*Alpha, 1.0f*Alpha, 1.0f*Alpha, Alpha);
 			Graphics()->QuadsSetRotation(m_aItems[i].m_StartAngle + m_aItems[i].m_LifeTime * 2.0f);
 			RenderTools()->SelectSprite(SPRITE_STAR1);
-			RenderTools()->DrawSprite(Pos.x, Pos.y, 48.0f);
+			RenderTools()->DrawSprite(Pos.x, Pos.y, 48.0f * Scale);
 			i++;
 		}
 	}
